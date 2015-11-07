@@ -82,6 +82,44 @@ object Monad {
 
   implicit val listMonad: Monad[List] = new ListMonad
 
+  private class VectorMonad extends Monad[Vector] {
+    override def flatMap[A, B](ca: Vector[A])(f: A => Vector[B]): Vector[B] = ca.flatMap(f)
+    override def insert[A](a: A): Vector[A] = Vector(a)
+  }
+  
+  implicit val vectorMonad: Monad[Vector] = new VectorMonad
+  
+  import org.scalactic.Every
+  private class EveryMonad extends Monad[Every] {
+    override def flatMap[A, B](ca: Every[A])(f: A => Every[B]): Every[B] = ca.flatMap(f)
+    override def insert[A](a: A): Every[A] = Every(a)
+  }
+  
+  implicit val everyMonad: Monad[Every] = new EveryMonad
+  
+  import scala.util.Try
+  private class TryMonad extends Monad[Try] {
+    override def flatMap[A, B](ca: Try[A])(f: A => Try[B]): Try[B] = ca.flatMap(f)
+    override def insert[A](a: A): Try[A] = Try(a)
+  }
+  
+  implicit val tryMonad: Monad[Try] = new TryMonad
+  
+  private class StreamMonad extends Monad[Stream] {
+    override def flatMap[A, B](ca: Stream[A])(f: A => Stream[B]): Stream[B] = ca.flatMap(f)
+    override def insert[A](a: A): Stream[A] = Stream(a)
+  }
+  
+  implicit val streamMonad: Monad[Stream] = new StreamMonad
+  
+  import org.scalactic.Chain
+  private class ChainMonad extends Monad[Chain] {
+    override def flatMap[A, B](ca: Chain[A])(f: A => Chain[B]): Chain[B] = ca.flatMap(f)
+    override def insert[A](a: A): Chain[A] = Chain(a) 
+  }
+  
+  implicit val chainMonad: Monad[Chain] = new ChainMonad
+  
   private class OptionMonad extends Monad[Option] {
     override def flatMap[A, B](ca: Option[A])(f: (A) => Option[B]): Option[B] = ca.flatMap(f)
     override def insert[A](a: A): Option[A] = Option(a)

@@ -38,9 +38,46 @@ class MonadSpec extends UnitSpec {
   it should "provide an instance for List" in {
     new MonadLaws[List].assert()
   }
+  
   it should "provide an instance for Option" in {
     new MonadLaws[Option].assert()
   }
+  
+  it should "provide an instance for Vector" in {
+    new MonadLaws[Vector].assert()
+  }
+  
+  it should "provide an instance for Every for One" in {
+    import org.scalactic.Every
+    import Arbitrary.arbitrary
+    implicit def arbEveryOne[A](implicit arbA: Arbitrary[A]): Arbitrary[Every[A]] = Arbitrary(for (a <- arbitrary[A]) yield Every(a))
+    new MonadLaws[Every].assert()
+  }
+  
+  it should "provide an instance for Every for Many" in {
+    import org.scalactic.Every
+    import Arbitrary.arbitrary
+    implicit def arbEveryMany[A](implicit arbA: Arbitrary[A]): Arbitrary[Every[A]] = Arbitrary(for (a <- arbitrary[A]; as <- arbitrary[List[A]]) yield Every(a, as: _*))
+    new MonadLaws[Every].assert()
+  }
+  
+  it should "provide an instance for Try over the Success side" in {
+    import scala.util.Try
+    implicit def arbTry[A](implicit arbA: Arbitrary[A]): Arbitrary[Try[A]] = Arbitrary(for (a <- Arbitrary.arbitrary[A]) yield Try(a))
+    new MonadLaws[Try].assert()
+  }
+  
+  it should "provide an instance for Stream " in {
+    new MonadLaws[Stream].assert()
+  }
+  
+  it should "provide an instance for Chain " in {
+    import org.scalactic.Chain
+    import Arbitrary.arbitrary
+    implicit def arbChain[A](implicit arbA: Arbitrary[A]): Arbitrary[Chain[A]] = Arbitrary(for (a <- arbitrary[A]; as <- arbitrary[List[A]]) yield Chain(a, as: _*))
+    new MonadLaws[Chain].assert()
+  }
+  
   it should "provide an instance for Or, which abstracts over the Good side" in {
     implicit def orArbGood[G, B](implicit arbG: Arbitrary[G]): Arbitrary[G Or B] = Arbitrary(for (g <- Arbitrary.arbitrary[G]) yield Good(g))
     new MonadLaws[Or.B[Int]#G].assert()
@@ -57,5 +94,6 @@ class MonadSpec extends UnitSpec {
     val adapted = new Monad.Adapter[List, List[Int]]((List(List(1, 2), List(3, 4), List(5, 6))))
     adapted.flatten shouldEqual List(1, 2, 3, 4, 5, 6)
   }
+  
 }
 
